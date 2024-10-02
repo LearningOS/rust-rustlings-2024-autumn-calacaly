@@ -2,7 +2,6 @@
     single linked list merge
     This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -66,13 +65,48 @@ impl<T> LinkedList<T> {
             },
         }
     }
-    pub fn merge(list_a: LinkedList<T>, list_b: LinkedList<T>) -> Self {
-        // TODO
-
-        Self {
-            length: 0,
-            start: None,
-            end: None,
+    pub fn merge(list_a: LinkedList<T>, list_b: LinkedList<T>) -> Self
+    where
+        T: Eq + PartialEq + Ord + PartialOrd + Clone,
+    {
+        match (list_a.length, list_b.length) {
+            (0, 0) => Self {
+                length: 0,
+                start: None,
+                end: None,
+            },
+            (0, _) => list_a,
+            (_, 0) => list_b,
+            (_, _) => {
+                let mut ret_list = LinkedList::new();
+                let mut a_ptr = list_a.start;
+                let mut b_ptr = list_b.start;
+                'out_loop: loop {
+                    unsafe {
+                        match (a_ptr, b_ptr) {
+                            (None, None) => break 'out_loop,
+                            (Some(a_node), Some(b_node)) => {
+                                if (*a_node.as_ptr()).val > (*b_node.as_ptr()).val {
+                                    ret_list.add((*b_node.as_ptr()).val.clone());
+                                    b_ptr = (*b_node.as_ptr()).next;
+                                } else {
+                                    ret_list.add((*a_node.as_ptr()).val.clone());
+                                    a_ptr = (*a_node.as_ptr()).next;
+                                }
+                            }
+                            (None, Some(b_node)) => {
+                                ret_list.add((*b_node.as_ptr()).val.clone());
+                                b_ptr = (*b_node.as_ptr()).next;
+                            }
+                            (Some(a_node), None) => {
+                                ret_list.add((*a_node.as_ptr()).val.clone());
+                                a_ptr = (*a_node.as_ptr()).next;
+                            }
+                        }
+                    }
+                }
+                ret_list
+            }
         }
     }
 }
